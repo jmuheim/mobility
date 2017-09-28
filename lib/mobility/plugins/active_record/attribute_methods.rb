@@ -9,8 +9,6 @@ module Mobility
         def attributes
           super.merge(translated_attributes)
         end
-
-        define_method :untranslated_attributes, ::ActiveRecord::Base.instance_method(:attributes)
       end
 
       class AttributeMethods < Module
@@ -18,6 +16,12 @@ module Mobility
           include TranslatedAttributes
           define_method :translated_attributes do
             super().merge(attribute_names.inject({}) { |attributes, name| attributes.merge(name.to_s => send(name)) })
+          end
+        end
+
+        def included(model_class)
+          model_class.class_eval do
+            define_method :untranslated_attributes, ::ActiveRecord::Base.instance_method(:attributes)
           end
         end
       end
